@@ -3,13 +3,10 @@ title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - shell
-  - ruby
-  - python
-  - javascript
+  - http
 
 toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
+  - <a href='https://subagamilenia.com'>Documentation Powered by Subaga Inti Milenia</a>
 
 includes:
   - errors
@@ -21,221 +18,167 @@ code_clipboard: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
-
-We have language bindings in Shell, Ruby, Python, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
-
-This example API documentation page was created with [Slate](https://github.com/slatedocs/slate). Feel free to edit it and use it as a base for your own API's documentation.
+Welcome to the open SIM API! You can use this api to generate QRIS for payment. You need to request the secret key to our team, please send an email to [this](mailto:ade.bambang@subagamilenia.com)
 
 # Authentication
 
-> To authorize, use this code:
+SIM uses API keys to allow access to the API. You need to request the secret key to our team, please send an email to [this](mailto:ade.bambang@subagamilenia.com).
 
-```ruby
-require 'kittn'
+SIM expects for the API key to be included in all API requests to the server in a header that looks like the following:
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
-
-```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here" \
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-```
-
-> Make sure to replace `meowmeowmeow` with your API key.
-
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+`key: xxxxxxx`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>xxxxxxx</code> with your personal API key.
 </aside>
 
-# Kittens
+# QRIS Order
 
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
+## Create QRIS Order
 
 ```shell
-curl "http://example.com/api/kittens" \
-  -H "Authorization: meowmeowmeow"
+curl -X POST --location "https://sim.adebmbng.com/api/order/open/transaction" \
+    -H "Content-Type: application/json" \
+    -H "key: xxxxxx" \
+    -d "{
+          "orderType": "public-transaction",
+          "merchantId": "subaga-parking",
+          "price": 2500
+        }"
 ```
 
-```javascript
-const kittn = require('kittn');
+```http
+POST https://sim.adebmbng.com/api/order/open/transaction
+Content-Type: application/json
+key: xxxxxx
 
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
+{
+  "orderType": "public-transaction",
+  "merchantId": "subaga-parking",
+  "price": 2500
+}
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
+{
+  "code": 200,
+  "data": [
+    {
+      "qrString": "00020101021226660014ID.LINKAJA.WWW011893600911002411480002152004230411480010303UME51450015ID.OR.GPNQR.WWW02150000000000000000303UME520454995802ID5924Xendit Test - Do Not Pay6007Jakarta61061234566238011570ODN4RksMgs7HZ071570ODN4RksMgs7HZ53033605404250063042291",
+      "invoiceId": "INVNVB3TN",
+      "orderDetail": {
+        "id": "caa8ad5d-9d76-4396-8b95-b98534981791",
+        "invoiceId": "INVNVB3TN",
+        "paymentStatus": "waitingForPayment",
+        "price": 2500,
+        "orderType": "public-transaction",
+        "merchantId": "subaga-parking",
+        "isActive": true,
+        "merchantStatus": "orderReceived",
+        "createdAt": "2021-07-07T16:24:58.709221+07:00",
+        "updatedAt": "2021-07-07T16:24:58.709221+07:00"
+      }
+    }
+  ],
+  "message": "success"
+}
 ```
 
-This endpoint retrieves all kittens.
+This endpoint request an order that has QR payment.
 
-### HTTP Request
+### URL
 
-`GET http://example.com/api/kittens`
+`https://sim.adebmbng.com/api/order/open/transaction`
 
 ### Query Parameters
 
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
+Parameter | Required | Default | Description
+--------- | ------- | ------- | -----------
+orderType | true | public-transaction | Use this as order type
+merchantId | true | subaga-parking-## | You can change ## with your unique ID
+price | true | 0 | Price minimum is 2500
+ppn | false | false | Set ppn 10%
+discount | false | 0 | Set discount price
+additionalData | false | | Your unique data, it we return in callback
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
+## Get order detail
 
 ```shell
-curl "http://example.com/api/kittens/2" \
-  -H "Authorization: meowmeowmeow"
+curl -X GET --location "https://sim.adebmbng.com/api/order/open/transaction/INVPFN0PA" \
+    -H "key: xxxxxxx"
 ```
 
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
+```http
+GET https://sim.adebmbng.com/api/order/open/transaction/INVPFN0PA
+key: xxxxxxx
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
 {
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+  "code": 200,
+  "data": [
+    {
+      "id": "caa8ad5d-9d76-4396-8b95-b98534981791",
+      "invoiceId": "INVNVB3TN",
+      "paymentStatus": "waitingForPayment",
+      "price": 2500,
+      "orderType": "public-transaction",
+      "merchantId": "subaga-parking",
+      "isActive": true,
+      "createdAt": "2021-07-07T16:24:58.709221Z",
+      "updatedAt": "2021-07-07T16:24:58.709221Z",
+      "qrPayment": "00020101021226660014ID.LINKAJA.WWW011893600911002411480002152004230411480010303UME51450015ID.OR.GPNQR.WWW02150000000000000000303UME520454995802ID5924Xendit Test - Do Not Pay6007Jakarta61061234566238011570ODN4RksMgs7HZ071570ODN4RksMgs7HZ53033605404250063042291"
+    }
+  ],
+  "message": "success"
 }
 ```
 
-This endpoint retrieves a specific kitten.
+This endpoint retrieves a specific order detail.
 
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+### URL
 
-### HTTP Request
-
-`GET http://example.com/kittens/<ID>`
+`https://sim.adebmbng.com/api/order/open/transaction/{{invoice}}`
 
 ### URL Parameters
 
 Parameter | Description
 --------- | -----------
-ID | The ID of the kitten to retrieve
+invoice | Invoice ID from the response of create order
 
-## Delete a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
+## Payment callback
 
 ```shell
-curl "http://example.com/api/kittens/2" \
-  -X DELETE \
-  -H "Authorization: meowmeowmeow"
 ```
 
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
+```http
 ```
 
-> The above command returns JSON structured like this:
+> After we received the payment from user, we will send you this information:
 
 ```json
 {
-  "id": 2,
-  "deleted" : ":("
+  "orderSerial": "",
+  "orderStatus": "",
+  "price": 9,
+  "orderType": "",
+  "userId": "",
+  "merchantId": "",
+  "isActive": true,
+  "createdBy": "",
+  "createdAt": "",
+  "updatedBy": "",
+  "updatedAt": "",
+  "discount": 0,
+  "ppn": 0,
+  "voucherSerial": "",
+  "additionalData": ""
 }
 ```
 
-This endpoint deletes a specific kitten.
-
-### HTTP Request
-
-`DELETE http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
+SIM will send you this information after we received the payment. Please give us url of your payment callback
 
